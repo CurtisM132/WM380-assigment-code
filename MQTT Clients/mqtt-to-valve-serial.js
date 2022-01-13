@@ -1,26 +1,29 @@
 var SerialPort = require('serialport');
 var mqtt = require('mqtt');
+const fs = require('fs');
 
 
-function createBrokerClient() {
-	console.log("Connecting to MQTT broker");
+function createBrokerClient(logFile) {
+	logFile.write("Connecting to MQTT broker");
 	return mqtt.connect("mqtt://localhost", { clientId: "mqttjs01" });
 }
 
-function subscribeToSensorData(client, serialPort) {
-	console.log("Subscribing to Sensor Data");
+function subscribeToSensorData(client, serialPort, logFile) {
+	logFile.write("Subscribing to Sensor Data");
 	client.subscribe("sensor-data", { qos: 1 });
 
 	// handle incoming messages
 	client.on('message', function (topic, message, packet) {
 		console.log("Recieved Sensor Data: ", message.toString())
 		
-		const angle = `${interpretSensorData(JSON.parse(message.toString()))}`
+		const angle = `${interpretSensorData(JSON.parse(message.toString(), logFile))}`;
+		logFile.write(`Write valve angle to serial port: ${angle}`)
+
 		serialPort.write(angle)
 	});
 }
 
-function interpretSensorData(data) {
+function interpretSensorData(data, logFile) {
 	let angle = 0
 
 	try {
@@ -39,19 +42,20 @@ function interpretSensorData(data) {
 		}
 	}
 	catch (err) {
-		console.log("invalid sensor data")
+		logFile.write("invalid sensor data")
 	}
 
 	// return '{angle:' + angle + '}'
-	console.log("angle", angle);
 	return angle;
 }
+
+let logFile = fs.createWriteStream('log.txt');
+const client = createBrokerClient()
 
 var serialPort = new SerialPort('COM3', {
 	baudRate: 9600
 });
 
-const client = createBrokerClient()
 client.on("connect", function () {
 	if (client.connected) {
 		subscribeToSensorData(client, serialPort)
