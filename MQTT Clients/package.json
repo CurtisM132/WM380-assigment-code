@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "serialport": "^9.2.8"
+  },
+  "devDependencies": {
+    "mqtt": "^4.3.4"
+  }
+}
