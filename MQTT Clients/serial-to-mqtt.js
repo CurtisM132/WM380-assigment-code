@@ -11,7 +11,7 @@ function publishSensorData(client, data) {
 		retain: true,
 		qos: 1
 	};
-	
+
 	if (client.connected == true) {
 		console.log("Publishing to sensor-data topic: ", data);
 		client.publish("sensor-data", data, options);
@@ -20,14 +20,15 @@ function publishSensorData(client, data) {
 
 const client = createBrokerClient()
 
-    var serialPort = new SerialPort('COM4', {
-        baudRate: 9600
-    });
-    
-    // Recieve data from Arduino
-    serialPort.on('readable', function () {
-        publishSensorData(client, serialPort.read().toString())
-    });
+var serialPort = new SerialPort('COM4', {
+	baudRate: 9600
+});
+
+const Readline = SerialPort.parsers.Readline
+const parser = serialPort.pipe(new Readline())
+parser.on('data', function(data) {
+	publishSensorData(client, data)
+});
 
 // DEBUG
 // handle errors
