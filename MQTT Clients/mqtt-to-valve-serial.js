@@ -1,39 +1,37 @@
 var SerialPort = require('serialport');
-var mqtt = require('mqtt');
 const fs = require('fs');
 
-const SENSOR_DATA_TOPIC = "sensor-data";
-const VALVE_MICROCONTROLLER_SERIAL_PORT = "COM3"
+import {
+	SENSOR_DATA_TOPIC,
+	VALVE_MICROCONTROLLER_SERIAL_PORT,
+	createBrokerClient,
+} from "./common.js"
 
-// Creates and returns an MQTT client
-function createBrokerClient(host, log) {
-	log.write("INFO: Connecting to MQTT broker");
-	return mqtt.connect(`mqtt://${host}`, { clientId: "mqttjs01" });
-}
 
 // Subscribes to the sensor data topic 
-function subscribeToSensorData(client, log) {
-	log.write("INFO: Subscribing to Sensor Data");
-	client.subscribe(SENSOR_DATA_TOPIC, { qos: 1 }, function (err) {
+function subscribeToSensorData(mqttClient, log) {
+	log.write("INFO: Subscribing to Sensor Data topic\n");
+	mqttClient.subscribe(SENSOR_DATA_TOPIC, { qos: 1 }, function (err) {
 		if (err) {
-			throw new Error(`FATAL: Failed to subscribe to ${SENSOR_DATA_TOPIC}`);
+			log.write(`FATAL: Failed to subscribe to ${SENSOR_DATA_TOPIC} topic - ${err}\n`)
+			throw new Error(`FATAL: Failed to subscribe to ${SENSOR_DATA_TOPIC} topic`);
 		}
 	});
 }
 
 // Handles received sensor data messages by extracting the message data, calculating the water valve angle
 // then sending that angle to the serial port for use by other microcontrollers
-function handleSensorDataMessages(client, serialPort, log) {
+function handleSensorDataMessages(mqttClient, serialPort, log) {
 	// Handle incoming messages
-	client.on('message', function (topic, msgBuffer, packet) {
+	mqttClient.on('message', function (topic, msgBuffer, packet) {
 		if (topic == SENSOR_DATA_TOPIC) {
 			// Incoming message is received as a DataBuffer
 			const message = msgBuffer.toString()
-			console.log("INFO: Received Sensor Data - ", message)
+			console.log(`INFO: Received Sensor Data - ${message}\n`)
 
 			const angle = `${interpretSensorData(JSON.parse(message), log)}`;
 
-			log.write(`INFO: Writing valve angle (${angle}) to serial port (${VALVE_MICROCONTROLLER_SERIAL_PORT})`)
+			log.write(`INFO: Writing valve angle (${angle}) to serial port (${VALVE_MICROCONTROLLER_SERIAL_PORT})\n`)
 			serialPort.write(angle)
 		}
 	});
@@ -60,32 +58,36 @@ function interpretSensorData(data, log) {
 		}
 	}
 	catch (err) {
-		log.write("ERROR: Failed to parse sensor data - ", data)
+		log.write(`ERROR: Failed to parse sensor data - ${err}\n`)
 	}
 
 	// return '{angle:' + angle + '}'
 	return angle;
 }
 
+
 let logFile = fs.createWriteStream('log.txt');
-const client = createBrokerClient("localhost", logFile)
+const mqttClient = createBrokerClient("localhost", logFile)
 
 var serialPort = new SerialPort(VALVE_MICROCONTROLLER_SERIAL_PORT, {
 	baudRate: 9600
 });
 
-client.on("connect", function () {
-	if (client.connected) {
-		subscribeToSensorData(client, logFile)
-		handleSensorDataMessages(client, serialPort, logFile)
+mqttClient.on("connect", function () {
+	if (mqttClient.connected) {
+		logFile.write("INFO: Connected to MQTT Broker\n")
+		subscribeToSensorData(mqttClient, logFile)
+		handleSensorDataMessages(mqttClient, serialPort, logFile)
 	} else {
-		logFile.write("FATAL: Failed to connect to MQTT broker")
+		logFile.write("FATAL: Failed to connect to MQTT broker\n")
 		throw Error("FATAL: Failed to connect to MQTT broker")
 	}
 });
 
-// Handle assorted client errors
-client.on("error", function (err) {
-	logFile.write("ERROR: Recieved error from MQTT Client - ", err)
+
+// Handle assorted MQTT client errors
+mqttClient.on("error", function (err) {
+	logFile.write(`ERROR: Recieved error from MQTT Client - ${err}\n`)
 });
 
+var timer_id = setInterval(function () { publish(client, timer_id); }, 5000);
