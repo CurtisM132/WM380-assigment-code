@@ -1,0 +1,17 @@
+INFO: Connecting to MQTT broker
+INFO: Connected to MQTT Broker
+INFO: Successfully opened Serial Port connection to COM3
+INFO: Subscribing to Sensor Data topic
+INFO: Successfully subscribed to Sensor Data topic
+INFO: Received Sensor Data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Writing valve angle (50) to serial port COM3
+INFO: Received Sensor Data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Writing valve angle (50) to serial port COM3
+INFO: Received Sensor Data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Writing valve angle (50) to serial port COM3
+INFO: Received Sensor Data - { "temperature": 24.50, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Writing valve angle (50) to serial port COM3
+INFO: Received Sensor Data - { "temperature": 25.00, "temperatureUnit":"C", "humidity": 25.00 }
+INFO: Writing valve angle (50) to serial port COM3
+INFO: Received Sensor Data - { "temperature": 25.50, "temperatureUnit":"C", "humidity": 24.00 }
+INFO: Writing valve angle (75) to serial port COM3

@@ -1,0 +1,17 @@
+INFO: Connecting to MQTT broker
+INFO: Connected to MQTT Broker
+INFO: Successfully opened Serial Port connection to COM4
+INFO: Subscribing to Sensor Data topic
+INFO: Successfully subscribed to Sensor Data topic
+INFO: Received sensor data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Received sensor data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Received sensor data - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 24.00, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Received sensor data - { "temperature": 24.50, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 24.50, "temperatureUnit":"C", "humidity": 27.00 }
+INFO: Received sensor data - { "temperature": 25.00, "temperatureUnit":"C", "humidity": 25.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 25.00, "temperatureUnit":"C", "humidity": 25.00 }
+INFO: Received sensor data - { "temperature": 25.50, "temperatureUnit":"C", "humidity": 24.00 }
+INFO: Publishing data to sensor-data topic - { "temperature": 25.50, "temperatureUnit":"C", "humidity": 24.00 }
