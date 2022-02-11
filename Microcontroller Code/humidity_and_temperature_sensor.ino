@@ -49,7 +49,7 @@ void loop( )
 
   static unsigned long led_timestamp = millis( );
 
-  /* Measure temperature and humidity.  If the functions returns
+  /* Measure temperature and humidity. If the functions returns
      true, then a measurement is available. */
   if( measure_environment( &temperature, &humidity ) == true )
   {
