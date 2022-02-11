@@ -1,11 +1,11 @@
 var SerialPort = require('serialport');
 const fs = require('fs');
 
-import {
+const {
 	SENSOR_DATA_TOPIC,
 	VALVE_MICROCONTROLLER_SERIAL_PORT,
 	createBrokerClient,
-} from "./common.js"
+} = require('./common');
 
 
 // Subscribes to the sensor data topic 
@@ -16,6 +16,8 @@ function subscribeToSensorData(mqttClient, log) {
 			log.write(`FATAL: Failed to subscribe to ${SENSOR_DATA_TOPIC} topic - ${err}\n`)
 			throw new Error(`FATAL: Failed to subscribe to ${SENSOR_DATA_TOPIC} topic`);
 		}
+
+		log.write("INFO: Successfully subscribed to Sensor Data topic\n");
 	});
 }
 
@@ -66,12 +68,21 @@ function interpretSensorData(data, log) {
 }
 
 
-let logFile = fs.createWriteStream('log.txt');
+let logFile = fs.createWriteStream('valveLog.txt');
 const mqttClient = createBrokerClient("localhost", logFile)
 
 var serialPort = new SerialPort(VALVE_MICROCONTROLLER_SERIAL_PORT, {
 	baudRate: 9600
-});
+},
+	function (err) {
+		if (err) {
+			logFile.write(`FATAL: Failed to open Serial Port connection to ${VALVE_MICROCONTROLLER_SERIAL_PORT} - ${err.message}\n`)
+			throw new Error(`FATAL: Failed to open Serial Port connection to ${VALVE_MICROCONTROLLER_SERIAL_PORT} - ${err.message}\n`);
+		}
+
+		logFile.write(`INFO: Successfully opened Serial Port connection to ${VALVE_MICROCONTROLLER_SERIAL_PORT}\n`)
+	}
+);
 
 mqttClient.on("connect", function () {
 	if (mqttClient.connected) {
@@ -87,7 +98,5 @@ mqttClient.on("connect", function () {
 
 // Handle assorted MQTT client errors
 mqttClient.on("error", function (err) {
-	logFile.write(`ERROR: Recieved error from MQTT Client - ${err}\n`)
+	logFile.write(`ERROR: Received error from MQTT Client - ${err}\n`)
 });
-
-var timer_id = setInterval(function () { publish(client, timer_id); }, 5000);
