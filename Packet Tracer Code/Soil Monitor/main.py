@@ -24,8 +24,12 @@ def on_connect(status, msg, packet):
         print msg
 
 
-def publishToSensorTopic(data):
-    mqttclient.publish("sensor-data", data, 1)
+def publishToSensorTopic(data, monitorId):
+    topic = "sensor-data/%s" % monitorId
+
+    print "Publishing sensor data: %s, topic: %s" % (data, topic)
+
+    mqttclient.publish(topic, data, 1)
 
 
 def main():
@@ -33,9 +37,9 @@ def main():
     mqttclient.onConnect(on_connect)
     mqttclient.connect("10.0.0.2", "", "")
 
-    pinMode(A0, IN)  # read humdity
-    pinMode(A1, IN)  # read water
-    pinMode(A2, IN)  # read temperature
+    pinMode(A0, IN)  # set pin to read (humidity)
+    pinMode(A1, IN)  # set pin to read (water level)
+    pinMode(A2, IN)  # # set pin to read (temperature)
 
     while True:
         # read and map temperature to celsius
@@ -50,9 +54,9 @@ def main():
         jsonData = "{\"id\": %s, \"humidity\": %s, \"water\": %s, \"temperature\": %s}" % (
             1, humdity, water, temperature)
 
-        print "Publishing sensor data: %s" % jsonData
-
-        publishToSensorTopic(jsonData)
+        # Publish the sensor readings
+        # For this simulated design the field and soil monitor IDs are hardcoded
+        publishToSensorTopic(jsonData, "1/1")
 
         delay(8000)
 

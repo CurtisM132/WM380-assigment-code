@@ -8,8 +8,9 @@ def on_connect(status, msg, packet):
     if status == "Success":
         print status + ": " + msg
 
-        # Susbcribe to the water angle MQTT topic on a successfully connection to the broker
-        mqttclient.subscribe("valve-angle")
+        # Susbcribe to the water angle MQTT topic on a successful connection to the broker
+        # Field and water valve ID's are hardcoded for this simulation
+        mqttclient.subscribe("valve-angle/1/1")
     elif status == "Error":
         print status + ": " + msg
     elif status == "":
@@ -32,8 +33,8 @@ def on_message_received(status, msg, packet):
         print "Extracted valve angle from message: %s degrees" % data["angle"]
         customWrite(0, data["angle"])
 
-        # Update the water detection topic after a delay (to allow water to flow over the sensor)
-        delay(5000)
+        # Update the water detection topic
+        # In the real sytem there would be a delay (to allow water to flow over the sensor)
         waterLevel = analogRead(A0)
         if waterLevel < 5:
             publishToWaterDetectedTopic("false", "1")
@@ -45,7 +46,11 @@ def on_message_received(status, msg, packet):
 
 
 def publishToWaterDetectedTopic(data, valveId):
-    mqttclient.publish("water-detected/%" % valveId, data, 1)
+    topic = "water-detected/%s" % valveId
+
+    print "Publish %s to topic: %s" % (data, topic)
+
+    mqttclient.publish(topic, data, 1)
 
 
 def main():
@@ -56,7 +61,7 @@ def main():
 
     mqttclient.connect("10.0.0.2", "", "")
 
-    pinMode(A0, IN)  # read humdity
+    pinMode(A0, IN)  # set pin to read (water level)
 
     while True:
         delay(60000)

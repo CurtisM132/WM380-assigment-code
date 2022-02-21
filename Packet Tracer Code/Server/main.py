@@ -14,7 +14,7 @@ def on_connect(status, msg, packet):
         print status + ": " + msg
 
         # Susbcribe to the sensor data MQTT topic on a successfully connection to the broker
-        mqttclient.subscribe("sensor-data")
+        mqttclient.subscribe("sensor-data/#")
     elif status == "Error":
         print status + ": " + msg
     elif status == "":
@@ -32,7 +32,9 @@ def on_message_received(status, msg, packet):
     if status == "Success" or status == "Error":
         print status + ": " + msg
 
-        processSensorData(json.loads(packet["payload"]))
+        # Hardcoded to only pay attention to the first barley field soil monitor
+        if packet["topic"] == "sensor-data/1/1":
+            processSensorData(json.loads(packet["payload"]))
 
     elif status == "":
         print msg
@@ -61,15 +63,19 @@ def processSensorData(sensorData):
     if angle > 160:
         angle = 160
 
-    publishWaterValveAngle(angle)
+    # Publish the angle to the appropriate water valve
+    # For this simulated design the field and water valve ID is hardcoded
+    publishWaterValveAngle(angle, "1/1")
 
 
 # Publish the water valve angle to a MQTT topic ready for a water valve microcontroller consumer
-def publishWaterValveAngle(angle):
-    print "Publishing water valve angle: %d" % angle
+def publishWaterValveAngle(angle, valveId):
+    topic = "valve-angle/%s" % valveId
     data = "{\"angle\": %d}" % angle
 
-    mqttclient.publish("valve-angle", data, 1)
+    print "Publishing water valve angle: %d, topic: %s" % (angle, topic)
+
+    mqttclient.publish(topic, data, 1)
 
 
 def main():

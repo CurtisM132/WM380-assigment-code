@@ -12,9 +12,3 @@ def getTemperature():
 	
 def subscribeToWeatherData(subscription):
 	http.onDone(subscription)
-	
-# test function, we need to actually do something with the weather data.	
-def onHTTPDone(status, data):
-	print("status: " + str(status))
-	print("data: " + data)
-	return data
